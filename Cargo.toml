@@ -1,0 +1,15 @@
+[package]
+name = "garch"
+version = "0.1.0"
+edition = "2021"
+authors = ["Rhaqim <anusiemj@gmail.com>"]
+description = "A simple command line tool to scaffold a new Go project with different architectures"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = { version = "0.4.19", features = ["serde"] }
+clap = {version = "4.4.18", features = ["derive"]}
+tokio = { version = "1.36.0", features = ["full"] }
+serde = { version = "1.0.130", features = ["derive"] }
+serde_json = "1.0.68"
