@@ -1,6 +1,8 @@
 pub mod garch_cli {
     use clap::{Args, Parser, Subcommand};
 
+    use crate::cmd::boilerplate::garch_boilerplate::boilerplate;
+
     #[derive(Parser, Debug)]
     #[clap(name = "garch-cli", version = "0.1.0", author = "Garch")]
     #[clap(about = "A CLI for scaffolding Go projects")]
@@ -15,7 +17,7 @@ pub mod garch_cli {
     #[derive(Subcommand, Debug)]
     pub enum GarchCommands {
         #[command(about = "Generate default Go project")]
-        Generate(GarchArgs),
+        Gen(GarchArgs),
     }
 
     #[derive(Args, Debug, Clone)]
@@ -40,7 +42,7 @@ pub mod garch_cli {
         let cli = GarchCli::parse();
 
         match cli.subcmd {
-            GarchCommands::Generate(_) => {
+            GarchCommands::Gen(_) => {
                 let mut config = ProjectConfig::new();
 
                 println!("Welcome to Garch CLI!");
@@ -68,5 +70,9 @@ pub mod garch_cli {
     async fn generate_boilerplate(config: &ProjectConfig) {
         println!("Generating boilerplate for project: {}", config.title);
         // Generate boilerplate code based on the configuration
+
+        boilerplate(&config.title);
+
+        println!("Boilerplate generated successfully!");
     }
 }
