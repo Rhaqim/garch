@@ -1,15 +1,18 @@
-use crate::cmd::{FileStructure, FolderStructure};
+use crate::cmd::{architecture::hexagonal::internal_folders, FileStructure, FolderStructure};
 
-const MAIN_FILE: &str = "main.go";
+// Root Files
 const README_FILE: &str = "README.md";
 const LICENSE_FILE: &str = "LICENSE";
 const GITIGNORE_FILE: &str = ".gitignore";
 
+// Root Folders
 const CMD_FOLDER: &str = "cmd";
 const INTERNAL_FOLDER: &str = "internal";
 const PKG_FOLDER: &str = "pkg";
 const TESTDATA_FOLDER: &str = "testdata";
 
+// CMD Folder
+const MAIN_FILE: &str = "main.go";
 const CONTENT: &str = r#"package main
 
 import "fmt"
@@ -19,7 +22,10 @@ func main() {
 }
 "#;
 
+// Hexagonal Architecture
 pub fn root_folders() -> Vec<FolderStructure> {
+    let internal_folders = internal_folders();
+
     vec![
         FolderStructure {
             folder_title: CMD_FOLDER.to_string(),
@@ -31,7 +37,7 @@ pub fn root_folders() -> Vec<FolderStructure> {
         },
         FolderStructure {
             folder_title: INTERNAL_FOLDER.to_string(),
-            sub_folders: None,
+            sub_folders: Some(internal_folders),
             files: None,
         },
         FolderStructure {
