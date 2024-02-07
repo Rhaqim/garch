@@ -1,7 +1,9 @@
 pub mod garch_cli {
+    use std::process::Command;
+
     use clap::{Args, Parser, Subcommand};
 
-    use crate::cmd::boilerplate::garch_boilerplate::boilerplate;
+    use crate::cmd::{BoilerplateStructure, Boilerplate};
 
     #[derive(Parser, Debug)]
     #[clap(name = "garch-cli", version = "0.1.0", author = "Garch")]
@@ -26,6 +28,7 @@ pub mod garch_cli {
     #[derive(Args, Debug)]
     pub struct ProjectConfig {
         pub title: String,
+        pub author: String,
         // Add more fields for other configurations
     }
 
@@ -33,9 +36,20 @@ pub mod garch_cli {
         pub fn new() -> Self {
             ProjectConfig {
                 title: String::new(),
+                author: String::new(),
                 // Initialize other fields as needed
             }
         }
+    }
+
+    fn get_git_from_config() -> String {
+        let output = Command::new("git")
+            .arg("config")
+            .arg("--get")
+            .arg("user.name")
+            .output()
+            .unwrap();
+        String::from_utf8(output.stdout).unwrap()
     }
 
     pub async fn parse() {
@@ -49,6 +63,7 @@ pub mod garch_cli {
 
                 // Example: Ask the user for the title of the project
                 config.title = prompt_user("What is the title of this project?");
+                config.author = get_git_from_config();
 
                 // Add more questions here, saving the answers to the config object
 
@@ -71,7 +86,13 @@ pub mod garch_cli {
         println!("Generating boilerplate for project: {}", config.title);
         // Generate boilerplate code based on the configuration
 
-        boilerplate(&config.title);
+        let boilerplate: BoilerplateStructure = Boilerplate::new(config);
+        let result = boilerplate.generate();
+
+        if let Err(e) = result {
+            println!("Error generating boilerplate: {}", e);
+            return;
+        }
 
         println!("Boilerplate generated successfully!");
     }

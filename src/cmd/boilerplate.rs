@@ -2,82 +2,99 @@ pub mod garch_boilerplate {
     use std::fs::{self, File};
     use std::io::{self, Write};
     use std::path::Path;
-    use std::process::{Command, Output};
+    use std::process::Command;
 
-    const MAIN_FILE: &str = "main.go";
-    const README_FILE: &str = "README.md";
-    const LICENSE_FILE: &str = "LICENSE";
-    const GITIGNORE_FILE: &str = ".gitignore";
+    use crate::cmd::structure::{root_files, root_folders};
+    use crate::cmd::{Boilerplate, BoilerplateStructure, FolderStructure};
+    use crate::core::cli::garch_cli::ProjectConfig;
 
-    const CMD_FOLDER: &str = "cmd";
-    const INTERNAL_FOLDER: &str = "internal";
-    const PKG_FOLDER: &str = "pkg";
-    const TESTDATA_FOLDER: &str = "testdata";
+    impl Boilerplate for BoilerplateStructure {
+        fn new(project: &ProjectConfig) -> Self {
+            
+            let folders = root_folders();
+            let files = root_files();
 
-    const CONTENT: &str = r#"package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Welcome to {}!")
-}
-"#;
-
-    fn create_folder(folder_title: &str) -> io::Result<()> {
-        fs::create_dir(folder_title)?;
-        Ok(())
-    }
-
-    fn change_directory(folder_title: &str) -> io::Result<()> {
-        std::env::set_current_dir(folder_title)?;
-        Ok(())
-    }
-
-    fn generate_file(file_name: &str, content: &str) -> io::Result<()> {
-        let mut file = File::create(file_name)?;
-        file.write_all(content.as_bytes())?;
-        Ok(())
-    }
-
-    pub fn boilerplate(project_title: &str) -> io::Result<()> {
-        create_folder(project_title)?;
-        change_directory(project_title)?;
-
-        let username = get_git_from_config();
-
-        run_go_init(&username, project_title)?;
-        generate_file(README_FILE, "")?;
-        generate_file(LICENSE_FILE, "")?;
-        generate_file(GITIGNORE_FILE, "")?;
-
-        create_folder(CMD_FOLDER)?;
-        create_folder(INTERNAL_FOLDER)?;
-        create_folder(PKG_FOLDER)?;
-        create_folder(TESTDATA_FOLDER)?;
-
-        generate_file(MAIN_FILE, CONTENT)?;
-
-        Ok(())
-    }
-
-    fn get_git_from_config() -> String {
-        let output = Command::new("git").arg("config").arg("--get").arg("user.name").output().unwrap();
-        String::from_utf8(output.stdout).unwrap()
-    }
-
-    fn run_go_init(username: &str, project_title: &str) -> io::Result<()> {
-        let output = Command::new("go").arg("mod").arg("init").arg(format!("github.com/{}/{}", username, project_title)).output()?;
-
-        io::stdout().write_all(&output.stdout)?;
-        io::stderr().write_all(&output.stderr)?;
-
-        if !output.status.success() {
-            return Err(io::Error::new(
-                io::ErrorKind::Other,
-                "Failed to run go mod init",
-            ));
+            BoilerplateStructure {
+                username: project.author.clone(),
+                project_title: project.title.clone(),
+                folders: Some(folders),
+                files: Some(files),
+            }
         }
 
-        Ok(())
+        fn generate(&self) -> io::Result<()> {
+            self.create_folder(&self.project_title)?;
+            self.change_directory(&self.project_title)?;
+            self.run_go_init()?;
+
+            self.generate_recursive(&self.folders)?;
+
+            if let Some(files) = &self.files {
+                for file in files {
+                    self.generate_file(&file.file_name, &file.content)?;
+                }
+            }
+
+            Ok(())
+        }
+
+        fn generate_recursive(&self, items: &Option<Vec<FolderStructure>>) -> io::Result<()> {
+            if let Some(items) = items {
+                for item in items {
+                    self.create_folder(&item.folder_title)?;
+                    self.change_directory(&item.folder_title)?;
+
+                    if let Some(files) = &item.files {
+                        for file in files {
+                            self.generate_file(&file.file_name, &file.content)?;
+                        }
+                    }
+
+                    self.generate_recursive(&item.sub_folders)?;
+                    self.change_directory("..")?;
+                }
+            }
+            Ok(())
+        }
+
+        fn create_folder(&self, folder_name: &str) -> io::Result<()> {
+            fs::create_dir(folder_name)?;
+            Ok(())
+        }
+
+        fn change_directory(&self, folder_name: &str) -> io::Result<()> {
+            let folder_path = Path::new(folder_name);
+            std::env::set_current_dir(folder_path)?;
+            Ok(())
+        }
+
+        fn generate_file(&self, file_name: &str, content: &str) -> io::Result<()> {
+            let mut file = File::create(file_name)?;
+            file.write_all(content.as_bytes())?;
+            Ok(())
+        }
+
+        fn run_go_init(&self) -> io::Result<()> {
+            let username = self.username.clone();
+            println!("Running go mod init for {}", username);
+
+            let output = Command::new("go")
+                .arg("mod")
+                .arg("init")
+                .arg(format!("github.com/{}/{}", "username", self.project_title))
+                .output()?;
+
+            io::stdout().write_all(&output.stdout)?;
+            io::stderr().write_all(&output.stderr)?;
+
+            if !output.status.success() {
+                return Err(io::Error::new(
+                    io::ErrorKind::Other,
+                    "Failed to run go mod init",
+                ));
+            }
+
+            Ok(())
+        }
     }
 }
