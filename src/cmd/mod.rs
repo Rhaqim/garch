@@ -1,6 +1,6 @@
 pub mod boilerplate;
 pub mod domain;
-pub mod structure;
+pub mod architecture;
 
 pub use domain::garch_cmd_domain::{
     Boilerplate, BoilerplateStructure, FileStructure, FolderStructure,

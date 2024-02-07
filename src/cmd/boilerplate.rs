@@ -4,7 +4,7 @@ pub mod garch_boilerplate {
     use std::path::Path;
     use std::process::Command;
 
-    use crate::cmd::structure::{root_files, root_folders};
+    use crate::cmd::architecture::{root_files, root_folders};
     use crate::cmd::{Boilerplate, BoilerplateStructure, FolderStructure};
     use crate::core::cli::garch_cli::ProjectConfig;
 
