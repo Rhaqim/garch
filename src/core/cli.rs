@@ -5,7 +5,7 @@ pub mod garch_cli {
 
     use crate::{
         cmd::{Boilerplate, BoilerplateStructure},
-        prompt::{prompt_question, prompt_option}
+        prompt::{prompt_option, prompt_question},
     };
 
     #[derive(Parser, Debug)]
@@ -82,7 +82,18 @@ pub mod garch_cli {
                 );
 
                 if !prompt_arch.is_empty() {
-                    config.arch = ARCHITECTURES[prompt_arch.parse::<usize>().unwrap() - 1].to_string();
+                    // check that the input is a number and within the range of the options
+                    let idx = prompt_arch.parse::<usize>().unwrap();
+
+                    if idx > 0 && idx <= ARCHITECTURES.len() {
+                        config.arch = ARCHITECTURES[idx - 1].to_string();
+                    } else {
+                        print!(
+                            "Invalid option, using default architecture: {}",
+                            default_arch
+                        );
+                        config.arch = default_arch.to_string();
+                    }
                 } else {
                     config.arch = default_arch.to_string();
                 }
@@ -96,7 +107,7 @@ pub mod garch_cli {
                 } else {
                     config.title = "garch_project".to_string();
                 }
-                
+
                 // Example: Ask the user for the author of the project
                 let git_username = get_git_from_config();
                 let prompt_username = prompt_question(&format!(
