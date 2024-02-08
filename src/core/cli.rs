@@ -3,7 +3,10 @@ pub mod garch_cli {
 
     use clap::{Args, Parser, Subcommand};
 
-    use crate::cmd::{BoilerplateStructure, Boilerplate};
+    use crate::{
+        cmd::{Boilerplate, BoilerplateStructure},
+        core::{prompt_question, prompt_option}
+    };
 
     #[derive(Parser, Debug)]
     #[clap(name = "garch-cli", version = "0.1.0", author = "Garch")]
@@ -25,8 +28,9 @@ pub mod garch_cli {
     #[derive(Args, Debug, Clone)]
     pub struct GarchArgs {}
 
-    #[derive(Args, Debug)]
+    #[derive(Args, Debug, Clone)]
     pub struct ProjectConfig {
+        pub arch: String,
         pub title: String,
         pub author: String,
         // Add more fields for other configurations
@@ -35,6 +39,7 @@ pub mod garch_cli {
     impl ProjectConfig {
         pub fn new() -> Self {
             ProjectConfig {
+                arch: String::new(),
                 title: String::new(),
                 author: String::new(),
                 // Initialize other fields as needed
@@ -57,13 +62,44 @@ pub mod garch_cli {
 
         match cli.subcmd {
             GarchCommands::Gen(_) => {
+                // if Args is empty, prompt the user for input
+
                 let mut config = ProjectConfig::new();
 
                 println!("Welcome to Garch CLI!");
 
+                let default_arch = "hexagonal";
+
+                // Ask what architecture the user wants to use and present options
+                let prompt_arch = prompt_option(
+                    &format!(
+                        "What architecture would you like to use? (default: {})",
+                        default_arch
+                    ),
+                    vec!["hexagonal", "onion", "clean"],
+                );
+
+                if !prompt_arch.is_empty() {
+                    config.arch = prompt_arch;
+                } else {
+                    config.arch = default_arch.to_string();
+                }
+
                 // Example: Ask the user for the title of the project
-                config.title = prompt_user("What is the title of this project?");
-                config.author = get_git_from_config();
+                config.title = prompt_question("What is the title of this project?");
+                let git_username = get_git_from_config();
+
+                // Example: Ask the user for the author of the project
+                let prompt_username = prompt_question(&format!(
+                    "Who is the author of this project? (default: {})",
+                    git_username
+                ));
+
+                if !prompt_username.is_empty() {
+                    config.author = prompt_username;
+                } else {
+                    config.author = git_username.trim_end().to_string();
+                }
 
                 // Add more questions here, saving the answers to the config object
 
@@ -71,15 +107,6 @@ pub mod garch_cli {
                 generate_boilerplate(&config).await;
             }
         }
-    }
-
-    fn prompt_user(question: &str) -> String {
-        println!("{}", question);
-        let mut input = String::new();
-        std::io::stdin()
-            .read_line(&mut input)
-            .expect("Failed to read input");
-        input.trim().to_string()
     }
 
     async fn generate_boilerplate(config: &ProjectConfig) {

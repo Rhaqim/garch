@@ -4,21 +4,27 @@ pub mod garch_boilerplate {
     use std::path::Path;
     use std::process::Command;
 
-    use crate::cmd::architecture::{root_files, root_folders};
+    use crate::cmd::architecture::architecture_map;
     use crate::cmd::{Boilerplate, BoilerplateStructure, FolderStructure};
     use crate::core::cli::garch_cli::ProjectConfig;
 
     impl Boilerplate for BoilerplateStructure {
         fn new(project: &ProjectConfig) -> Self {
-            
-            let folders = root_folders();
-            let files = root_files();
+            let architecture = project.arch.as_str();
+
+            let binding = architecture_map();
+
+            let (folders, files) = &binding
+                .iter()
+                .find(|(arch, _)| *arch == architecture)
+                .unwrap()
+                .1;
 
             BoilerplateStructure {
                 username: project.author.clone(),
                 project_title: project.title.clone(),
-                folders: Some(folders),
-                files: Some(files),
+                folders: Some(folders.clone()),
+                files: Some(files.clone()),
             }
         }
 
@@ -75,13 +81,10 @@ pub mod garch_boilerplate {
         }
 
         fn run_go_init(&self) -> io::Result<()> {
-            let username = self.username.clone();
-            println!("Running go mod init for {}", username);
-
             let output = Command::new("go")
                 .arg("mod")
                 .arg("init")
-                .arg(format!("github.com/{}/{}", "username", self.project_title))
+                .arg(format!("github.com/{}/{}", self.username, self.project_title))
                 .output()?;
 
             io::stdout().write_all(&output.stdout)?;
