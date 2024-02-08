@@ -1,4 +1,6 @@
 pub mod hexagonal;
+pub mod clean;
+pub mod onion;
 
 pub use hexagonal::root::{hex_root_files, hex_root_folders};
 
