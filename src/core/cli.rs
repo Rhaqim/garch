@@ -5,7 +5,7 @@ pub mod garch_cli {
 
     use crate::{
         cmd::{Boilerplate, BoilerplateStructure},
-        core::{prompt_question, prompt_option}
+        prompt::{prompt_question, prompt_option}
     };
 
     #[derive(Parser, Debug)]
