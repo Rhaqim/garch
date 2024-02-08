@@ -64,6 +64,8 @@ pub mod garch_cli {
             GarchCommands::Gen(_) => {
                 // if Args is empty, prompt the user for input
 
+                const ARCHITECTURES: [&str; 3] = ["hexagonal", "onion", "clean"];
+
                 let mut config = ProjectConfig::new();
 
                 println!("Welcome to Garch CLI!");
@@ -73,23 +75,30 @@ pub mod garch_cli {
                 // Ask what architecture the user wants to use and present options
                 let prompt_arch = prompt_option(
                     &format!(
-                        "What architecture would you like to use? (default: {})",
+                        "What architecture would you like to use? input the number of the option (default: {})",
                         default_arch
                     ),
-                    vec!["hexagonal", "onion", "clean"],
+                    (&ARCHITECTURES).to_vec(),
                 );
 
                 if !prompt_arch.is_empty() {
-                    config.arch = prompt_arch;
+                    config.arch = ARCHITECTURES[prompt_arch.parse::<usize>().unwrap() - 1].to_string();
                 } else {
                     config.arch = default_arch.to_string();
                 }
 
                 // Example: Ask the user for the title of the project
-                config.title = prompt_question("What is the title of this project?");
-                let git_username = get_git_from_config();
+                let title = prompt_question("What is the title of this project?");
 
+                if !title.is_empty() {
+                    // if there's a space in the title, replace it with an underscore
+                    config.title = title.replace(" ", "_");
+                } else {
+                    config.title = "garch_project".to_string();
+                }
+                
                 // Example: Ask the user for the author of the project
+                let git_username = get_git_from_config();
                 let prompt_username = prompt_question(&format!(
                     "Who is the author of this project? (default: {})",
                     git_username
