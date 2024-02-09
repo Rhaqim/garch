@@ -30,7 +30,8 @@ pub mod garch_cmd_domain {
         fn generate_recursive(&self, items: &Option<Vec<FolderStructure>>) -> io::Result<()>;
         fn create_folder(&self, folder_name: &str) -> io::Result<()>;
         fn change_directory(&self, folder_name: &str) -> io::Result<()>;
-        fn generate_file(&self, file_name: &str, content: &str) -> io::Result<()>;
+        fn create_file(&self, file_name: &str, content: &str) -> io::Result<()>;
+        fn run_git_init(&self) -> io::Result<()>;
         fn run_go_init(&self) -> io::Result<()>;
     }
 }
