@@ -188,5 +188,87 @@ pub mod garch_boilerplate {
 
             Ok(())
         }
+
+        /// Deletes the specified folder.
+        ///
+        /// # Arguments
+        ///
+        ///
+        /// * `folder_name` - The name of the folder to delete.
+        ///
+        /// # Returns
+        ///
+        /// An `io::Result` indicating the success or failure of the folder deletion process.
+        ///
+        /// # Note
+        ///
+        /// This method is not currently used in the application, but is included for future use.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// use garch::cmd::garch_boilerplate::Boilerplate;
+        ///
+        /// let boilerplate = BoilerplateStructure::new(&project);
+        /// boilerplate.delete_folder("folder_name");
+        ///
+        /// ```
+        fn delete_folder(&self, folder_name: &str) -> io::Result<()> {
+            fs::remove_dir(folder_name)?;
+            Ok(())
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+
+        use super::*;
+
+        fn project_config() -> ProjectConfig {
+            ProjectConfig {
+                author: String::from("John Doe"),
+                title: String::from("My Project"),
+                arch: String::from("hexagonal"),
+            }
+        }
+
+        #[test]
+        fn test_new() {
+            let architectures = vec![
+                String::from("hexagonal"),
+                String::from("clean"),
+                String::from("onion"),
+            ];
+
+            let project = project_config();
+
+            let boilerplate = BoilerplateStructure::new(&project);
+
+            assert_eq!(boilerplate.username, project.author);
+            assert_eq!(boilerplate.project_title, project.title);
+            assert!(architectures.contains(&project.arch));
+        }
+
+        #[test]
+        fn test_create_folder() {
+            let project = project_config();
+
+            let boilerplate = BoilerplateStructure::new(&project);
+
+            assert!(boilerplate.create_folder("test_folder").is_ok());
+        }
+
+        #[test]
+        fn test_generate() {
+            let project = project_config();
+
+            let boilerplate = BoilerplateStructure::new(&project);
+
+            assert!(boilerplate.generate().is_ok());
+
+            // Add additional assertions to verify the generated project structure and files
+        }
+
+        // Add more tests for other methods if needed
     }
 }
