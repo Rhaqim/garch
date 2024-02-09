@@ -146,7 +146,14 @@ pub mod garch_boilerplate {
         ///
         /// An `io::Result` indicating the success or failure of the `git init` command.
         fn run_git_init(&self) -> io::Result<()> {
-            let output = Command::new("git").arg("init").output()?;
+            let output = Command::new("git")
+                .arg("init")
+                .arg("&&")
+                .arg("git")
+                .arg("branch")
+                .arg("-M")
+                .arg("main")
+                .output()?;
 
             io::stdout().write_all(&output.stdout)?;
             io::stderr().write_all(&output.stderr)?;
