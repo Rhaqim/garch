@@ -28,13 +28,5 @@ pub mod garch_cmd_domain {
     pub trait Boilerplate {
         fn new(project: &ProjectConfig) -> Self;
         fn generate(&self) -> io::Result<()>;
-        fn generate_recursive(&self, items: &Option<Vec<FolderStructure>>) -> io::Result<()>;
-        fn create_folder(&self, folder_name: &str) -> io::Result<()>;
-        fn change_directory(&self, folder_name: &str) -> io::Result<()>;
-        fn create_file(&self, file_name: &str, content: &str) -> io::Result<()>;
-        fn run_git_init(&self) -> io::Result<()>;
-        fn run_go_init(&self) -> io::Result<()>;
-        fn add_database(&self, db_type: &str) -> io::Result<()>;
-        fn delete_folder(&self, folder_name: &str) -> io::Result<()>;
     }
 }
