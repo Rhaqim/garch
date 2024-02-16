@@ -1,11 +1,10 @@
 pub mod garch_cli {
-    use std::process::Command;
 
     use clap::{Args, Parser, Subcommand};
 
     use crate::{
         cmd::{Boilerplate, BoilerplateStructure},
-        prompt::{prompt_option, prompt_question},
+        core::prompts::garch_cli_prompts::get_project_config,
     };
 
     #[derive(Parser, Debug)]
@@ -49,16 +48,6 @@ pub mod garch_cli {
         }
     }
 
-    fn get_git_from_config() -> String {
-        let output = Command::new("git")
-            .arg("config")
-            .arg("--get")
-            .arg("user.name")
-            .output()
-            .unwrap();
-        String::from_utf8(output.stdout).unwrap()
-    }
-
     pub async fn parse() {
         let cli = GarchCli::parse();
 
@@ -66,94 +55,12 @@ pub mod garch_cli {
             GarchCommands::Gen(_) => {
                 // if Args is empty, prompt the user for input
 
-                const ARCHITECTURES: [&str; 3] = ["hexagonal", "onion", "clean"];
-
                 let mut config = ProjectConfig::new();
 
                 println!("Welcome to Garch CLI!");
 
-                let default_arch = "hexagonal";
-
-                // Ask what architecture the user wants to use and present options
-                let prompt_arch = prompt_option(
-                    &format!(
-                        "What architecture would you like to use? input the number of the option (default: {})",
-                        default_arch
-                    ),
-                    (&ARCHITECTURES).to_vec(),
-                );
-
-                if !prompt_arch.is_empty() {
-                    // check that the input is a number and within the range of the options
-                    let idx = prompt_arch.parse::<usize>().unwrap();
-
-                    if idx > 0 && idx <= ARCHITECTURES.len() {
-                        config.arch = ARCHITECTURES[idx - 1].to_string();
-                    } else {
-                        print!(
-                            "Invalid option, using default architecture: {}",
-                            default_arch
-                        );
-                        config.arch = default_arch.to_string();
-                    }
-                } else {
-                    config.arch = default_arch.to_string();
-                }
-
-                // Ask the user for the title of the project
-                let title = prompt_question("What is the title of this project?");
-
-                if !title.is_empty() {
-                    // if there's a space in the title, replace it with an underscore
-                    config.title = title.replace(" ", "_");
-                } else {
-                    config.title = "garch_project".to_string();
-                }
-
-                // Ask the user for the author of the project
-                let git_username = get_git_from_config();
-                let prompt_username = prompt_question(&format!(
-                    "Who is the author of this project? (default: {})",
-                    git_username
-                ));
-
-                if !prompt_username.is_empty() {
-                    config.author = prompt_username;
-                } else {
-                    config.author = git_username.trim_end().to_string();
-                }
-
-                // Ask the user if they want to add a database
-                let prompt_db = prompt_option(
-                    "Would you like to add a database to this project? (default: No)",
-                    vec!["Yes", "No"],
-                );
-
-                let databases = vec!["PostgreSQL", "MySQL", "SQLite", "MongoDB"];
-
-                if !prompt_db.is_empty() {
-                    // if the user selects yes, prompt for the database type
-                    if prompt_db == "1" {
-                        let db_selection = prompt_option(
-                            "What type of database would you like to use? input the number of the option",
-                            databases.clone(),
-                        );
-
-                        if !db_selection.is_empty() {
-                            // save the database type to the config
-                            
-                            let idx = db_selection.parse::<usize>().unwrap();
-
-                            if idx > 0 && idx <= databases.len() {
-                                config.db_type = databases[idx - 1].to_string();
-                            } else {
-                                print!("Invalid option, not adding a database");
-                            }
-                        }
-                    }
-                }
-
-                // Add more questions here, saving the answers to the config object
+                // Get project configuration from the user
+                get_project_config(&mut config);
 
                 // Once all questions are answered, generate boilerplate
                 generate_boilerplate(&config).await;
