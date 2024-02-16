@@ -1,10 +1,48 @@
 pub mod garch_cli_prompts {
+    use std::io::{self, Write};
     use std::process::Command;
 
-    use crate::{
-        core::cli::garch_cli::ProjectConfig,
-        prompt::{prompt_option, prompt_question},
-    };
+    use crate::core::cli::garch_cli::ProjectConfig;
+
+    fn _get_input(prompt: &str) -> String {
+        print!("{}", prompt);
+
+        io::stdout().flush().unwrap();
+
+        let mut input = String::new();
+
+        io::stdin().read_line(&mut input).unwrap();
+
+        input.trim().to_string()
+    }
+
+    fn prompt_question(question: &str) -> String {
+        println!("{}", question);
+
+        let mut input = String::new();
+
+        std::io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read input");
+
+        input.trim().to_string()
+    }
+
+    pub fn prompt_option(question: &str, options: Vec<&str>) -> String {
+        println!("{}", question);
+
+        for (i, option) in options.iter().enumerate() {
+            println!("{}. {}", i + 1, option);
+        }
+
+        let mut input = String::new();
+
+        std::io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read input");
+
+        input.trim().to_string()
+    }
 
     fn get_git_from_config() -> String {
         let output = Command::new("git")
@@ -100,7 +138,7 @@ pub mod garch_cli_prompts {
                     if idx > 0 && idx <= databases.len() {
                         config.db_type = databases[idx - 1].to_string();
                     } else {
-                        print!("Invalid option, not adding a database");
+                        panic!("Invalid option, not adding a database");
                     }
                 }
             }
