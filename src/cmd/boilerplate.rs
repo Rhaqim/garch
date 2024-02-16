@@ -3,7 +3,10 @@ pub mod garch_boilerplate {
     use std::io;
 
     use crate::cmd::architecture::architecture_map;
-    use crate::cmd::{add_database, change_directory, create_file, create_folder, generate_recursive, run_git_init, run_go_init, Boilerplate, BoilerplateStructure};
+    use crate::cmd::{
+        add_database, change_directory, create_file, create_folder, generate_recursive,
+        run_git_init, run_go_init, Boilerplate, BoilerplateStructure,
+    };
     use crate::core::cli::garch_cli::ProjectConfig;
 
     /// Implementation of the `Boilerplate` trait for the `BoilerplateStructure` struct.
@@ -70,8 +73,6 @@ pub mod garch_boilerplate {
 
             Ok(())
         }
-
-        
     }
 
     #[cfg(test)]
@@ -104,7 +105,7 @@ pub mod garch_boilerplate {
             assert_eq!(boilerplate.project_title, project.title);
             assert!(architectures.contains(&project.arch));
         }
-        
+
         #[test]
         fn test_generate() {
             let project = project_config();

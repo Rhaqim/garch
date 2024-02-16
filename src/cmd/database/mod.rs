@@ -19,8 +19,7 @@ fn database_map() -> HashMap<String, Vec<String>> {
             "go mod tidy".to_string(),
         ],
     );
-    map.insert(
-        "SQLite".to_string(), vec!["go mod tidy".to_string()]);
+    map.insert("SQLite".to_string(), vec!["go mod tidy".to_string()]);
     map.insert(
         "MongoDB".to_string(),
         vec![
