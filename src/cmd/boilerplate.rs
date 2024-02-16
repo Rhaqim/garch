@@ -5,6 +5,7 @@ pub mod garch_boilerplate {
     use std::process::Command;
 
     use crate::cmd::architecture::architecture_map;
+    use crate::cmd::database::run_database_commands;
     use crate::cmd::{Boilerplate, BoilerplateStructure, FolderStructure};
     use crate::core::cli::garch_cli::ProjectConfig;
 
@@ -35,6 +36,7 @@ pub mod garch_boilerplate {
                 project_title: project.title.clone(),
                 folders: Some(folders.clone()),
                 files: Some(files.clone()),
+                db_type: Some(project.db_type.clone()),
             }
         }
 
@@ -53,6 +55,11 @@ pub mod garch_boilerplate {
 
             // Run go mod init
             self.run_go_init()?;
+
+            // if db_type is not empty, add the database to the project
+            if let Some(db_type) = &self.db_type {
+                self.add_database(db_type)?;
+            }
 
             // Generate project structure
             self.generate_recursive(&self.folders)?;
@@ -148,11 +155,11 @@ pub mod garch_boilerplate {
         fn run_git_init(&self) -> io::Result<()> {
             let output = Command::new("git")
                 .arg("init")
-                .arg("&&")
-                .arg("git")
-                .arg("branch")
-                .arg("-M")
-                .arg("main")
+                // .arg("&&")
+                // .arg("git")
+                // .arg("branch")
+                // .arg("-M")
+                // .arg("main")
                 .output()?;
 
             io::stdout().write_all(&output.stdout)?;
@@ -191,6 +198,39 @@ pub mod garch_boilerplate {
                     io::ErrorKind::Other,
                     "Failed to run go mod init",
                 ));
+            }
+
+            Ok(())
+        }
+
+        /// Add databsaes to the Go project.
+        /// 
+        /// # Arguments
+        /// 
+        /// * `db_type` - The type of database to add to the project.
+        /// 
+        /// # Returns
+        /// 
+        /// A `Vec` of `String` containing the commands to run to add the specified database to the project.
+        fn add_database(&self, db_type: &str) -> io::Result<()> {
+            let commands = run_database_commands(db_type);
+
+            // run the commands on the shell
+            for command in commands {
+                let output = Command::new("sh")
+                    .arg("-c")
+                    .arg(command)
+                    .output()?;
+
+                io::stdout().write_all(&output.stdout)?;
+                io::stderr().write_all(&output.stderr)?;
+
+                if !output.status.success() {
+                    return Err(io::Error::new(
+                        io::ErrorKind::Other,
+                        "Failed to run database commands",
+                    ));
+                }
             }
 
             Ok(())
@@ -236,6 +276,7 @@ pub mod garch_boilerplate {
                 author: String::from("John Doe"),
                 title: String::from("My Project"),
                 arch: String::from("hexagonal"),
+                db_type: String::from("mongodb"),
             }
         }
 

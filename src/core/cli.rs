@@ -33,6 +33,7 @@ pub mod garch_cli {
         pub arch: String,
         pub title: String,
         pub author: String,
+        pub db_type: String,
         // Add more fields for other configurations
     }
 
@@ -42,6 +43,7 @@ pub mod garch_cli {
                 arch: String::new(),
                 title: String::new(),
                 author: String::new(),
+                db_type: String::new(),
                 // Initialize other fields as needed
             }
         }
@@ -98,7 +100,7 @@ pub mod garch_cli {
                     config.arch = default_arch.to_string();
                 }
 
-                // Example: Ask the user for the title of the project
+                // Ask the user for the title of the project
                 let title = prompt_question("What is the title of this project?");
 
                 if !title.is_empty() {
@@ -108,7 +110,7 @@ pub mod garch_cli {
                     config.title = "garch_project".to_string();
                 }
 
-                // Example: Ask the user for the author of the project
+                // Ask the user for the author of the project
                 let git_username = get_git_from_config();
                 let prompt_username = prompt_question(&format!(
                     "Who is the author of this project? (default: {})",
@@ -119,6 +121,36 @@ pub mod garch_cli {
                     config.author = prompt_username;
                 } else {
                     config.author = git_username.trim_end().to_string();
+                }
+
+                // Ask the user if they want to add a database
+                let prompt_db = prompt_option(
+                    "Would you like to add a database to this project? (default: No)",
+                    vec!["Yes", "No"],
+                );
+
+                let databases = vec!["PostgreSQL", "MySQL", "SQLite", "MongoDB"];
+
+                if !prompt_db.is_empty() {
+                    // if the user selects yes, prompt for the database type
+                    if prompt_db == "1" {
+                        let db_selection = prompt_option(
+                            "What type of database would you like to use? input the number of the option",
+                            databases.clone(),
+                        );
+
+                        if !db_selection.is_empty() {
+                            // save the database type to the config
+                            
+                            let idx = db_selection.parse::<usize>().unwrap();
+
+                            if idx > 0 && idx <= databases.len() {
+                                config.db_type = databases[idx - 1].to_string();
+                            } else {
+                                print!("Invalid option, not adding a database");
+                            }
+                        }
+                    }
                 }
 
                 // Add more questions here, saving the answers to the config object
