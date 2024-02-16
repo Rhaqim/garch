@@ -103,7 +103,7 @@ pub mod garch_files_folders {
         /// boilerplate.delete_folder("folder_name");
         ///
         /// ```
-        pub fn delete_folder(folder_name: &str) -> io::Result<()> {
+        pub fn _delete_folder(folder_name: &str) -> io::Result<()> {
             fs::remove_dir(folder_name)?;
             Ok(())
         }

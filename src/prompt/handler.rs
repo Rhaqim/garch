@@ -1,7 +1,7 @@
 pub mod garch_prompts {
     use std::io::{self, Write};
 
-    pub fn get_input(prompt: &str) -> String {
+    pub fn _get_input(prompt: &str) -> String {
         print!("{}", prompt);
 
         io::stdout().flush().unwrap();
