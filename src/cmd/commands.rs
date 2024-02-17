@@ -14,11 +14,11 @@ pub mod garch_cli_commands {
     pub fn run_git_init() -> io::Result<()> {
         let output = Command::new("git")
             .arg("init")
-            // .arg("&&")
-            // .arg("git")
-            // .arg("branch")
-            // .arg("-M")
-            // .arg("main")
+            .arg("&&")
+            .arg("git")
+            .arg("branch")
+            .arg("-m")
+            .arg("main")
             .output()?;
 
         io::stdout().write_all(&output.stdout)?;
