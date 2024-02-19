@@ -32,6 +32,12 @@ cd garch
 cargo install --path .
 ```
 
+- executeable -  the executeable will be located in the `root` directory of the project.
+
+```bash
+./garch --help
+```
+
 ## Usage
 
 To use Garch, you need to run the following command:
